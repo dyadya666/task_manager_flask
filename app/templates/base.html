@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="{{url_for('.static', filename='css/bootstrap.min.css')}}" />
+    <link rel="stylesheet" href="{{url_for('.static', filename='css/style.css')}}" />
+    <script src="{{url_for('.static', filename='js/jquery-3.2.1.js')}}"></script>
+    <script src="{{url_for('.static', filename='js/bootstrap.min.js')}}"></script>
+    <script src="{{url_for('.static', filename='js/base.js')}}" async></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if title %}
+    <title>{{title}}</title>
+    {% else %}
+    <title>Guess the number</title>
+    {% endif %}
+</head>
+
+<body>
+    <div id="content">
+        {% with message = get_flashed_messages() %}
+        {% if message %}
+        <ul>
+            {% for message in message %}
+            <li>{{message}}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <div id="footer">
+        {% block footer %}
+        <br>
+        &copy; Copyright 2017 by
+        <a href="https://www.linkedin.com/in/sergey-chepurnov-9a4424126" target="_blank">SChepurnov</a>.
+        {% endblock %}
+    </div>
+</body>
+
+</html>

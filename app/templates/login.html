@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<h1>Sign in</h1>
+
+{{form.openid.ValidationError}}
+<form action="" method="post" name="login">
+    {{form.hidden_tag()}}
+    <dl>
+        <dt>Please enter your name to start: </dt>
+        <dd>{{form.openid(size=50)}}</dd>
+    </dl>
+    {% for error in form.errors.openid %}
+    <span>{{error}}</span>
+    {% endfor %}
+    <p><input type="submit" value="Sign In"></p>
+</form>
+
+{% endblock %}

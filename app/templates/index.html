@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{{title}}</title>
+</head>
+
+{% block head %}{% endblock %}
+
+{% block content %}
+
+<h2>Welcome to "Guess the number" game.</h2>
+<p>
+    Hi!
+    <br>
+    You need to guess the Number in the range from "0" to "100" and you have 10
+    attempts.
+    <br>
+    <br>
+    Good Luck!!!
+</p>
+<br>
+<form action="{{ url_for('login') }}" name="login">
+    <button type="submit">Start</button>
+</form>
+<i>Click the button to start.</i>
+
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{{title}}</title>
+</head>
+
+{% block head %}{% endblock %}
+
+{% block content %}
+<h2>User <i id="username">{{user.username}}</i> is guessing and has <span id="attempt">10</span> attempts.</h2>
+
+{{form.try_to_guess.ValidationError}}
+    {{form.hidden_tag()}}
+    <input id="number_to_guess" type="hidden" value="{{form.number_to_guess}}">
+    <input id="user_id" type="hidden" value="{{user.id}}">
+    <input id="balance" type="hidden" value="9">
+    <dl>
+        <dt>Please enter a number between "0" and "100":</dt>
+        <dd>{{form.try_to_guess(size=3)}}</dd>
+        <dd id="more_less"></dd>
+        <dd id="result"></dd>
+    </dl>
+    {% for error in form.errors.try_to_guess %}
+    <span>{{error}}</span>
+    {% endfor %}
+    <p>
+        <button id="send_number" onmouseover="this.style.background= 'yellow'" onmouseout="this.style.background= '#f5f5f5'">Send</button>
+        <button id="get_stat" onmouseover="this.style.background= 'green'" onmouseout="this.style.background= '#f5f5f5'">Get statistic</button>
+        <a href="/index" onclick="endGame()" id="exit" onmouseover="this.style.background= 'blue'" onmouseout="this.style.background= '#f5f5f5'">Exit</a>
+    </p>
+    <p><a id="game_over" href="/index"  onmouseover="this.style.background= 'red'" onmouseout="this.style.background= 'f5f5f5'" hidden>Game Over</a></p>
+<div id="stat" class="content"></div>
+<br>
+{% endblock %}
