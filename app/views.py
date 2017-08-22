@@ -3,7 +3,7 @@ import random
 from flask import render_template, redirect, url_for, request, jsonify
 
 from app import app, db, open_id
-from .forms import LoginForm, GameForm
+from .forms import LoginForm
 from .models import User, Score
 
 
@@ -26,7 +26,7 @@ def login():
             db.session.commit()
         return redirect(url_for('game', username=user.username))
     return render_template('login.html',
-                           title='Sign In',
+                           title='Log In',
                            form=form)
 
 
