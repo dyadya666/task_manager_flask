@@ -3,20 +3,26 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, backref
 
 
+IN_PROGRESS = 'inprogress'
+COMPLETE = 'complete'
+
+
 class Users(db.Model):
     id = Column(Integer, primary_key=True)
-    username = Column(String(50), index=True, unique=True)
+    nickname = Column(String(50), index=True, unique=True)
 
-    projects = relationship('Projects', backref=backref('project', lazy=False))
+    projects = relationship('Projects', backref=backref('projects', lazy=False))
 
     def __repr__(self):
-        return '<User id: {0} - name: {1}>'.format(self.id, self.username)
+        return '<User id: {0} - nickname: {1}>'.format(self.id, self.nickname)
 
 
 class Projects(db.Model):
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
     name = Column(String, nullable=True)
+
+    tasks = relationship('Tasks', backref=backref('tasks', lazy=False))
 
     def __repr__(self):
         return '<User ID "{0}" - name of project {1}>'.\
@@ -24,4 +30,11 @@ class Projects(db.Model):
 
 
 class Tasks(db.Model):
-    pass
+    id = Column(Integer, primary_key=True)
+    project_id = Column(Integer, ForeignKey('projects.id'), nullable=True)
+    name = Column(String, index=True)
+    status = Column(String, default=IN_PROGRESS)
+
+    def __repr__(self):
+        return 'Project ID: {0}; name: "{1}"; status: "{2}"'.\
+            format(self.project_id, self.name, self.status)

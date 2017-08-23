@@ -1,94 +1,75 @@
-import random
+from flask import render_template, redirect, url_for, request, jsonify, g
+from flask_login import login_user, logout_user, current_user, login_required, \
+                        UserMixin
 
-from flask import render_template, redirect, url_for, request, jsonify
-
-from app import app, db, open_id
+from app import app, db, open_id, log_manager
 from .forms import LoginForm
-from .models import User, Score
+from .models import Users, Projects, Tasks
 
 
-@app.route('/', methods=['GET'])
-@app.route('/index', methods=['GET'])
-def index():
-    return render_template('index.html')
+@app.before_request
+def before_request():
+    g.user = current_user
 
 
+@app.route('/', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
 @open_id.loginhandler
 def login():
+    if g.user is not None and g.user.is_authenticated:
+        return redirect(url_for('view'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=str(form.openid.data).capitalize()).first()
+        user = Users.query.filter_by(nickname=form.openid.data).first()
+
         if user is None:
-            username = str(form.openid.data).capitalize()
-            user = User(username=username)
+            user = Users(nickname=form.openid.data)
             db.session.add(user)
             db.session.commit()
-        return redirect(url_for('game', username=user.username))
+
+        user = get_user(id=user.id)
+        login_user(user)
+        return redirect(request.args.get('next') or url_for('view'))
     return render_template('login.html',
                            title='Log In',
-                           form=form)
-
-
-@app.route('/game/<username>', methods=['GET', 'POST'])
-def game(username):
-    form = GameForm()
-    form.number_to_guess = random.randint(0, 100)
-    user = User.query.filter_by(username=username).first()
-    score = Score(number=form.number_to_guess,
-                  user_id=user.id,
-                  status='inprocess',
-                  progress='')
-    db.session.add(score)
-    db.session.commit()
-    return render_template('game.html',
-                           title='Game',
                            form=form,
-                           user=user)
+                           error=open_id.fetch_error())
 
 
-@app.route('/write_progress', methods=['POST'])
-def write_progress():
-    score = Score.query.filter_by(user_id=request.form['user_id'],
-                                  status='inprocess').first()
-    if score is None:
-        return jsonify({
-            'result': False
-        })
-    score.progress = score.progress + ' ' + str(request.form['progress'])
-    score.status = request.form['status']
-    db.session.add(score)
-    db.session.commit()
-
-    return jsonify({
-        'result': True
-    })
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 
-@app.route('/get_stat', methods=['POST'])
-def get_statistics():
-    scores = Score.query.filter_by(user_id=request.form['user_id']).all()
-    # import pdb; pdb.set_trace()
-    list_of_usersinfo = dict()
-    n = 0
-    for score in scores:
-        if score.status == 'inprocess':
-            continue
-        list_of_usersinfo[n] = str(score.number) + ', ' + \
-                               score.progress + ', ' + \
-                               score.status
-        n += 1
-
-    return jsonify(list_of_usersinfo)
+@app.route('/view')
+@login_required
+def view():
+    user = g.user
+    projects = Projects.query.filter_by(user_id=user.id).all()
+    return render_template('view.html',
+                           title='List',
+                           user=user,
+                           projects=projects)
 
 
-@app.route('/end_game', methods=['POST'])
-def end_game():
-    score = Score.query.filter_by(user_id=request.form['user_id'],
-                                  status='inprocess').first()
-    score.status = 'fail'
-    db.session.add(score)
-    db.session.commit()
-    return jsonify({
-        'result': True
-    })
+class User(UserMixin):
+    def __init__(self, nickname, id, active=True):
+        self.nickname = nickname
+        self.id = id
+        self.active = active
+
+    def is_active(self):
+        return self.active
+
+    def is_anonymous(self):
+        return False
+
+    def is_authenticated(self):
+        return True
+
+
+@log_manager.user_loader
+def get_user(id):
+    user = Users.query.get(id)
+    return User(user.nickname, user.id)

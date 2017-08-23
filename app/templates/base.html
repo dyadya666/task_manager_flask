@@ -17,7 +17,13 @@
 </head>
 
 <body>
+    {% if g.user.is_authenticated %}
+    <div class="navabar">
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
     <div id="content">
+    {% endif %}
+
         {% with message = get_flashed_messages() %}
         {% if message %}
         <ul>
@@ -33,6 +39,7 @@
 
     <div id="footer">
         {% block footer %}
+        &copy; Ruby Garage
         {% endblock %}
     </div>
 </body>

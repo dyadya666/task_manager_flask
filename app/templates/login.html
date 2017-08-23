@@ -4,8 +4,9 @@
 <h1>Log in</h1>
 
 {{form.openid.ValidationError}}
-<form action="" method="post" name="login">
+<form action="" method="post">
     {{form.hidden_tag()}}
+    {% if error %}<p class=error><strong>Error:</strong> {{ error }}</p>{% endif %}
     <dl>
         <dd>{{form.openid}}</dd>
     </dl>
