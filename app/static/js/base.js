@@ -1,9 +1,13 @@
 $(function () {
-    $('#send_number').on('click', function () {
-        var token = $('#csrf_token').val();
-        var user_id = $('#user_id').val();
-        var number_to_guess = parseInt($('#number_to_guess').val());
-        var try_to_guess = parseInt($('#try_to_guess').val());
+    $('#add_project').on('click', function () {
+        var name = $('#new_project').val();
+        $('#info').hide()
+        if (name.trim().length == 0){
+            document.getElementById('info').innerHTML = 'Cannot be blank!';
+            $('#info').show()
+        }
+        console.log(name.trim().length);
+        return;
 
         document.getElementById('result').innerHTML = '';
         if ( isNaN(try_to_guess)){

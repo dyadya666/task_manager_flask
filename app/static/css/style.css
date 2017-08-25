@@ -3,3 +3,7 @@ body {
     height: 100%;
     background-image: url("../images/sky_field.jpg");
 }
+
+h2 {
+    color: paleturquoise;
+}

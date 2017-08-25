@@ -1,22 +1,38 @@
 {% extends 'base.html' %}
 
+{% block head %}
 <head>
     <title>{{title}}</title>
 </head>
-
-{% block head %}{% endblock %}
+{% endblock %}
 
 {% block content %}
 
-<h2>Welcome to "Guess the number" game.</h2>
-<p>
-    Hi!
-    <br>
-    You need to guess the Number in the range from "0" to "100" and you have 10
-    attempts.
-    <br>
-    <br>
-    Good Luck!!!
-</p>
+<h2>User: {{ user.nickname }}</h2>
+
+{% for project in projects %}
+    <dev class="form">
+        <span style="color: white;">{{ project.name }}</span>
+            <button id="edit_project">Edit</button>
+            <button id="del_project">Delete</button>
+        <div class="">
+            <input type="text" id="new_task">
+            <button id="add_task">Add Task</button>
+        </div>
+    </dev>
+
+    {% for task in project.tasks %}
+        <div class="form">
+            <span style="color: plum;">{{ task.name }}</span>
+        <button id="move_task">Move</button>
+        <button id="edit_task">Edit</button>
+        <button id="del_task">Delete</button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<input type="text" id="new_project">
+<button id="add_project">Add TODO List</button>
+<br><span id="info"></span>
 
 {% endblock %}

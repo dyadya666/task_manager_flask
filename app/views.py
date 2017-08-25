@@ -20,16 +20,16 @@ def login():
         return redirect(url_for('view'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = Users.query.filter_by(nickname=form.openid.data).first()
+        user = Users.query.filter_by(nickname=form.nickname.data).first()
 
         if user is None:
-            user = Users(nickname=form.openid.data)
+            user = Users(nickname=form.nickname.data)
             db.session.add(user)
             db.session.commit()
 
         user = get_user(id=user.id)
         login_user(user)
-        return redirect(request.args.get('next') or url_for('view'))
+        return redirect(request.args.get('next') or url_for('view', nickname=g.user.nickname))
     return render_template('login.html',
                            title='Log In',
                            form=form,
@@ -42,9 +42,9 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/view')
+@app.route('/view/<nickname>')
 @login_required
-def view():
+def view(nickname):
     user = g.user
     projects = Projects.query.filter_by(user_id=user.id).all()
     return render_template('view.html',
@@ -73,3 +73,14 @@ class User(UserMixin):
 def get_user(id):
     user = Users.query.get(id)
     return User(user.nickname, user.id)
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html') ,404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return render_template('500.html'), 500

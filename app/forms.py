@@ -3,5 +3,5 @@ from wtforms import StringField, IntegerField, validators
 
 
 class LoginForm(FlaskForm):
-    openid = StringField('openid',
+    nickname = StringField('nickname',
                          [validators.required('Field is required!')])

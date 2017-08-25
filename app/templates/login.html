@@ -3,14 +3,14 @@
 {% block content %}
 <h1>Log in</h1>
 
-{{form.openid.ValidationError}}
+{{form.nickname.ValidationError}}
 <form action="" method="post">
     {{form.hidden_tag()}}
     {% if error %}<p class=error><strong>Error:</strong> {{ error }}</p>{% endif %}
     <dl>
-        <dd>{{form.openid}}</dd>
+        <dd>{{form.nickname}}</dd>
     </dl>
-    {% for error in form.errors.openid %}
+    {% for error in form.errors.nickname %}
     <span>{{error}}</span>
     {% endfor %}
     <p><input type="submit" value="Log In"></p>
