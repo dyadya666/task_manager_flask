@@ -1,0 +1,14 @@
+
+__pycache__/
+.idea/*
+.idea/
+app/__pycache__/
+
+myvenv/
+
+app.db
+db_repository/
+db_upgrade.py
+db_clear.py
+db_view.py
+
