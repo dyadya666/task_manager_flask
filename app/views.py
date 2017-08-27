@@ -84,3 +84,128 @@ def not_found_error(error):
 def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
+
+
+# API for Projects
+@app.route('/create_project', methods=['POST'])
+@login_required
+def create_project():
+    new_project = Projects(name=request.form['name'], user_id=g.user.id)
+    db.session.add(new_project)
+    db.session.commit()
+
+    check = Projects.query.filter_by(user_id=g.user.id,
+                                    name=request.form['name']).first()
+    if check is None:
+        return jsonify({
+            'result': False
+        })
+    return jsonify({
+        'result': True
+    })
+
+
+@app.route('/delete_project', methods=['POST'])
+@login_required
+def delete_project():
+    project = Projects.query.filter_by(id=request.form['project_id'],
+                                       user_id=g.user.id).first()
+    db.session.delete(project)
+    db.session.commit()
+
+    try:
+        Projects.query.filter_by(id=request.form['id'],
+                                 user_id=g.user.id).first()
+        return jsonify({
+            'result': False
+        })
+    except:
+        return jsonify({
+            'result': True
+        })
+
+
+@app.route('/update_project', methods=['POST'])
+@login_required
+def update_project():
+    project = Projects.query.filter_by(id=request.form['project_id'],
+                                       user_id=g.user.id).first()
+    project.name = request.form['new_name']
+    db.session.add(project)
+    db.session.commit()
+
+    check = Projects.query.filter_by(id=request.form['project_id'],
+                                     user_id=g.user.id).first()
+    if check.name == request.form['new_name']:
+        return jsonify({
+            'result': True
+        })
+
+    return jsonify({
+        'result': False
+    })
+
+
+# API for Tasks
+@app.route('/create_task', methods=['POST'])
+@login_required
+def create_task():
+    new_task = Tasks(name=str(request.form['new_name']).strip(),
+                     project_id=request.form['project_id'])
+    db.session.add(new_task)
+    db.session.commit()
+
+    check = Tasks.query.filter_by(name=request.form['new_name'],
+                                  project_id=request.form['project_id']).first()
+    if check is None:
+        return jsonify({
+            'result': False
+        })
+    return jsonify({
+        'result': True
+    })
+
+
+@app.route('/delete_task', methods=['POST'])
+@login_required
+def delete_task():
+    task = Tasks.query.filter_by(id=request.form['task_id'],
+                                 project_id=request.form['project_id']).first()
+    db.session.delete(task)
+    db.session.commit()
+
+    check = Tasks.query.filter_by(id=request.form['task_id'],
+                                  project_id=request.form['project_id']).first()
+    if check is None:
+        return jsonify({
+            'result': True
+        })
+    return jsonify({
+        'result': False
+    })
+
+
+@app.route('/update_task', methods=['POST'])
+@login_required
+def update_task():
+    task = Tasks.query.filter_by(id=request.form['task_id'],
+                                 project_id=request.form['project_id']).first()
+    if task is None:
+        return jsonify({
+            'result': False
+        })
+
+    task.name = str(request.form['new_name']).strip()
+    db.session.add(task)
+    db.session.commit()
+
+    check = Tasks.query.filter_by(id=request.form['task_id'],
+                                  project_id=request.form['project_id']).first()
+    if check.name != str(request.form['new_name']).strip():
+        return jsonify({
+            'result': False
+        })
+
+    return jsonify({
+        'result': True
+    })

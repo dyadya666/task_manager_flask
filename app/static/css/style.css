@@ -7,3 +7,9 @@ body {
 h2 {
     color: paleturquoise;
 }
+
+#info,
+#task_info,
+#new_task_info{
+    color: white;
+}

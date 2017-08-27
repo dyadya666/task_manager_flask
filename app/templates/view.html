@@ -11,22 +11,29 @@
 <h2>User: {{ user.nickname }}</h2>
 
 {% for project in projects %}
-    <dev class="form">
-        <span style="color: white;">{{ project.name }}</span>
-            <button id="edit_project">Edit</button>
-            <button id="del_project">Delete</button>
+    <div class="form">
+        <span id="name_{{ project.name }}" style="color: white;">{{ project.name }}</span>
+        <input type="hidden" id="project_id" value="{{ project.id }}">
+        <input type="text" id="project_name{{ project.id }}" value="{{ project.name }}" hidden>
+            <button id="edit{{ project.id }}" onclick="editProject({{project.id}}, '{{project.name}}')">Edit</button>
+            <button id="save{{ project.id }}" onclick="updateProject({{project.id}}, '{{project.name}}')" hidden>Save</button>
+            <button onclick="deleteProject({{project.id}})">Delete</button>
         <div class="">
             <input type="text" id="new_task">
             <button id="add_task">Add Task</button>
+            <span id="task_info" hidden></span>
         </div>
-    </dev>
+    </div>
 
     {% for task in project.tasks %}
         <div class="form">
-            <span style="color: plum;">{{ task.name }}</span>
+            <span id="task_name{{ task.id }}" style="color: plum;">{{ task.name }}</span>
+            <input type="text" id="new_task_name{{ task.id }}" value="{{ task.name }}" hidden>
         <button id="move_task">Move</button>
-        <button id="edit_task">Edit</button>
-        <button id="del_task">Delete</button>
+        <button id="edit_task{{ task.id }}" onclick="editTask({{ task.id }})">Edit</button>
+        <button id="save_task{{ task.id }}" onclick="updateTask({{ task.id }}, {{ project.id }})" hidden>Save</button>
+        <button onclick="deleteTask({{ task.id }}, {{ project.id }})">Delete</button>
+        <span id="new_task_info" hidden></span>
         </div>
     {% endfor %}
 {% endfor %}
