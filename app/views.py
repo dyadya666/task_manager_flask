@@ -196,12 +196,15 @@ def update_task():
         })
 
     task.name = str(request.form['new_name']).strip()
+    task.deadline = request.form['deadline']
     db.session.add(task)
     db.session.commit()
 
     check = Tasks.query.filter_by(id=request.form['task_id'],
                                   project_id=request.form['project_id']).first()
-    if check.name != str(request.form['new_name']).strip():
+    if check.name != str(request.form['new_name']).strip() and \
+        check.deadline != request.form['deadline']:
+
         return jsonify({
             'result': False
         })

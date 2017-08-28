@@ -1,30 +1,27 @@
 // CRUD for "Project"
 // Create project
-$(function () {
-    $('#add_project').on('click', function () {
-        var name = $('#new_project').val();
-        if (name.trim().length === 0){
-            document.getElementById('info').innerHTML = 'Cannot be blank!';
+function createProject() {
+    var name = $('#new_project').val();
+    if (name.trim().length === 0){
+        document.getElementById('info').innerHTML = 'Cannot be blank!';
+        $('#info').show();
+        return;
+    } else {
+        $('#info').hide();
+    }
+    $.post("/create_project", {
+        name: name
+    }).done(function (result) {
+        if (result['result'] === true){
             $('#info').show();
-            return;
-        } else {
-            $('#info').hide();
+            location.reload();
+        } else if (result['result'] === false){
+            alert('The Project was not created!');
         }
-
-        $.post("/create_project", {
-                name: name
-        }).done(function (result) {
-            if (result['result'] === true){
-                $('#info').show();
-                location.reload();
-            } else if (result['result'] === false){
-                alert('The Project was not created!');
-            }
-        }).fail(function () {
-            alert('Server error!');
-        });
+    }).fail(function () {
+        alert('Server error!');
     });
-});
+}
 
 // Delete Project
 function deleteProject(project_id) {
@@ -75,31 +72,28 @@ function updateProject(project_id, project_name) {
 }
 
 //Create Task
-$(function () {
-    $('#add_task').on('click', function () {
-        var new_name = $('#new_task').val();
-        var project_id = $('#project_id').val();
-        if (new_name.trim().length === 0){
-            document.getElementById('task_info').innerHTML = 'Cannot be blank!';
-            $('#task_info').show();
-            return;
-        } else {
-            $('#task_info').hide();
+function createTask(project_id) {
+    var new_name = $('#new_task' + project_id).val();
+    if (new_name.trim().length === 0){
+        document.getElementById('task_info' + project_id).innerHTML = 'Cannot be blank!';
+        $('#task_info' + project_id).show();
+        return;
+    } else {
+        $('#task_info' + project_id).hide();
+    }
+    $.post("/create_task", {
+        new_name: new_name,
+        project_id: project_id
+    }).done(function (result) {
+        if (result['result'] === true){
+            location.reload();
+        } else if (result['result'] === false){
+            alert('The Task was not created!');
         }
-        $.post("/create_task", {
-            new_name: new_name,
-            project_id: project_id
-        }).done(function (result) {
-            if (result['result'] === true){
-                location.reload();
-            } else if (result['result'] === false){
-                alert('The Task was not created!');
-            }
-        }).fail(function () {
-            alert('Server error!');
-        });
+    }).fail(function () {
+        alert('Server error!');
     });
-});
+}
 
 //Delete Task
 function deleteTask(task_id, project_id) {
@@ -129,6 +123,9 @@ function editTask(task_id) {
 
 function updateTask(task_id, project_id) {
     var new_name = $('#new_task_name' + task_id).val();
+    var deadline = $('#datepicker' + task_id).val();
+    console.log(new_name + ' : ' + deadline);
+
     if (new_name.trim().length === 0){
         document.getElementById('new_task_info').innerHTML = 'Cannot be blank!';
         $('#new_task_info').show();
@@ -140,7 +137,8 @@ function updateTask(task_id, project_id) {
     $.post("/update_task", {
         task_id: task_id,
         project_id: project_id,
-        new_name: new_name
+        new_name: new_name,
+        deadline: deadline
     }).done(function (result) {
         if (result['result'] === true){
             location.reload();
@@ -173,16 +171,20 @@ function doneTask(task_id, project_id) {
     });
 }
 
-$ = jQuery.noConflict();
-function showDate(task_id) {
-    $("#datepicker" + task_id).datepicker({
+
+$(document).ready(function() {
+    $(".ui-datepicker").datepicker({
         showOtherMonths: true,
         selectOtherMonths: true,
         changeMonth: true,
         changeYear: true,
-        dateFormat: "yy-mm-dd",
+        dateFormat: "yy/mm/dd",
         // maxDate: "-18y",
-        // minDate: "-60y",
+        minDate: "-0d",
         buttonText: "Choose"
     });
+});
+
+function showDate(task_id) {
+    $("#datepicker" + task_id).datepicker();
 }
