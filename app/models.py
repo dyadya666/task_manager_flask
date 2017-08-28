@@ -1,5 +1,5 @@
 from app import db
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship, backref
 
 
@@ -34,6 +34,8 @@ class Tasks(db.Model):
     project_id = Column(Integer, ForeignKey('projects.id'), nullable=True)
     name = Column(String, index=True)
     status = Column(String, default=IN_PROGRESS)
+    deadline = Column(Date, nullable=True)
+    priority = Column(Integer, nullable=True)
 
     def __repr__(self):
         return 'Project ID: {0}; name: "{1}"; status: "{2}"'.\

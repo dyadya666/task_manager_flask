@@ -3,7 +3,7 @@
 $(function () {
     $('#add_project').on('click', function () {
         var name = $('#new_project').val();
-        if (name.trim().length == 0){
+        if (name.trim().length === 0){
             document.getElementById('info').innerHTML = 'Cannot be blank!';
             $('#info').show();
             return;
@@ -18,7 +18,7 @@ $(function () {
                 $('#info').show();
                 location.reload();
             } else if (result['result'] === false){
-                alert('Project was not created!');
+                alert('The Project was not created!');
             }
         }).fail(function () {
             alert('Server error!');
@@ -35,7 +35,7 @@ function deleteProject(project_id) {
                 $('#info').show();
                 location.reload();
             } else if (result['result'] === false){
-                alert('Project was not deleted!');
+                alert('The Project was not deleted!');
             }
         }).fail(function () {
             alert('Server error!');
@@ -52,7 +52,7 @@ function editProject(project_id, project_name) {
 
 function updateProject(project_id, project_name) {
     var new_name = $('#project_name' + project_id).val();
-    if (new_name.trim().length == 0){
+    if (new_name.trim().length === 0){
         document.getElementById('name_' + project_name).innerHTML = 'Cannot be blank!';
         $('#name_' + project_name).show();
         return;
@@ -79,7 +79,7 @@ $(function () {
     $('#add_task').on('click', function () {
         var new_name = $('#new_task').val();
         var project_id = $('#project_id').val();
-        if (new_name.trim().length == 0){
+        if (new_name.trim().length === 0){
             document.getElementById('task_info').innerHTML = 'Cannot be blank!';
             $('#task_info').show();
             return;
@@ -93,7 +93,7 @@ $(function () {
             if (result['result'] === true){
                 location.reload();
             } else if (result['result'] === false){
-                alert('Task was not created!');
+                alert('The Task was not created!');
             }
         }).fail(function () {
             alert('Server error!');
@@ -107,10 +107,10 @@ function deleteTask(task_id, project_id) {
         task_id: task_id,
         project_id: project_id
     }).done(function (result) {
-        if (result['result'] == true){
+        if (result['result'] === true){
             location.reload();
-        } else if (result['result'] == false){
-            alert('Task was not deleted!');
+        } else if (result['result'] === false){
+            alert('The Task was not deleted!');
         }
     }).fail(function () {
         alert('Server error!');
@@ -123,12 +123,13 @@ function editTask(task_id) {
     $('#new_task_name' + task_id).show();
     $('#edit_task' + task_id).hide();
     $('#save_task' + task_id).show();
+    $('#datepicker' + task_id).show();
 }
 
 
 function updateTask(task_id, project_id) {
     var new_name = $('#new_task_name' + task_id).val();
-    if (new_name.trim().length == 0){
+    if (new_name.trim().length === 0){
         document.getElementById('new_task_info').innerHTML = 'Cannot be blank!';
         $('#new_task_info').show();
         return;
@@ -141,12 +142,47 @@ function updateTask(task_id, project_id) {
         project_id: project_id,
         new_name: new_name
     }).done(function (result) {
-        if (result['result'] == true){
+        if (result['result'] === true){
             location.reload();
-        } else if (result['result'] == false){
-            alert('Task was not updated!');
+        } else if (result['result'] === false){
+            alert('The Task was not updated!');
         }
     }).fail(function () {
         alert('Server error!');
+    });
+}
+
+
+//Mark Task as "done"
+function doneTask(task_id, project_id) {
+    var task_done = $('#task_done' + task_id).is(':checked');
+    console.log(task_id + ' : ' + project_id + ' done: ' + task_done);
+
+    $.post("/task_done", {
+        task_id: task_id,
+        project_id: project_id,
+        status: task_done
+    }).done(function (result) {
+        if (result['result'] === true){
+            location.reload();
+        } else if (result['result'] === false){
+            alert('The Task was not marked as "done"!');
+        }
+    }).fail(function () {
+        alert('Server error!');
+    });
+}
+
+$ = jQuery.noConflict();
+function showDate(task_id) {
+    $("#datepicker" + task_id).datepicker({
+        showOtherMonths: true,
+        selectOtherMonths: true,
+        changeMonth: true,
+        changeYear: true,
+        dateFormat: "yy-mm-dd",
+        // maxDate: "-18y",
+        // minDate: "-60y",
+        buttonText: "Choose"
     });
 }

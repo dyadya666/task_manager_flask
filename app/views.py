@@ -4,7 +4,7 @@ from flask_login import login_user, logout_user, current_user, login_required, \
 
 from app import app, db, open_id, log_manager
 from .forms import LoginForm
-from .models import Users, Projects, Tasks
+from .models import Users, Projects, Tasks, COMPLETE, IN_PROGRESS
 
 
 @app.before_request
@@ -208,4 +208,29 @@ def update_task():
 
     return jsonify({
         'result': True
+    })
+
+
+@app.route('/task_done', methods=['POST'])
+@login_required
+def task_done():
+    status = IN_PROGRESS
+    if request.form['status'] == 'true':
+        status = COMPLETE
+
+    task = Tasks.query.filter_by(id=request.form['task_id'],
+                                 project_id=request.form['project_id']).first()
+    task.status = status
+    db.session.add(task)
+    db.session.commit()
+
+    check = Tasks.query.filter_by(id=request.form['task_id'],
+                                 project_id=request.form['project_id']).first()
+    if check.status == status:
+        return jsonify({
+            'result': True
+        })
+
+    return jsonify({
+        'result': False
     })
