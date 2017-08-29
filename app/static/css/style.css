@@ -9,10 +9,10 @@ h2 {
 }
 
 #info,
-#new_task_info{
+#new_task_info {
     color: white;
 }
 
-.ui-datepicker{
+.ui-datepicker {
     width: 20rem;
 }

@@ -1,5 +1,11 @@
 // CRUD for "Project"
 // Create project
+function addProject() {
+    $('#add_project').hide();
+    $('#new_project').show();
+    $('#create_project').show();
+}
+
 function createProject() {
     var name = $('#new_project').val();
     if (name.trim().length === 0){
@@ -173,18 +179,31 @@ function doneTask(task_id, project_id) {
 
 
 $(document).ready(function() {
-    $(".ui-datepicker").datepicker({
-        showOtherMonths: true,
-        selectOtherMonths: true,
-        changeMonth: true,
-        changeYear: true,
-        dateFormat: "yy/mm/dd",
-        // maxDate: "-18y",
-        minDate: "-0d",
-        buttonText: "Choose"
-    });
+    function init() {
+        $(".ui-datepicker").datepicker({
+            showOtherMonths: true,
+            selectOtherMonths: true,
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "yy/mm/dd",
+            // maxDate: "-18y",
+            minDate: "-0d",
+            buttonText: "Choose"
+        });
+
+        $('.glyphicon.glyphicon-saved').hide();
+        $('#new_project').hide();
+        $('#create_project').hide();
+    }
+
+    init();
 });
 
 function showDate(task_id) {
     $("#datepicker" + task_id).datepicker();
+}
+
+//Prioritize Tasks
+function moveUp(task_id, project_id) {
+
 }

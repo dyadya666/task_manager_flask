@@ -47,6 +47,11 @@ def logout():
 def view(nickname):
     user = g.user
     projects = Projects.query.filter_by(user_id=user.id).all()
+    for project in projects:
+        # import pdb; pdb.set_trace()
+        tasks = project.tasks
+        tasks_sorted = sorted(tasks, key=lambda tasks: tasks.priority)
+        project.tasks = tasks_sorted
     return render_template('view.html',
                            title='List',
                            user=user,

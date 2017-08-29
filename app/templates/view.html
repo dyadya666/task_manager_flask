@@ -11,43 +11,62 @@
 <h2>User: {{ user.nickname }}</h2>
 
 {% for project in projects %}
-    <div class="form">
-        <span id="name_{{ project.name }}" style="color: white;">{{ project.name }}</span>
-        <input type="hidden" id="project_id" value="{{ project.id }}">
+    <div class="card" style="width: 50rem">
+        <div class="card-body">
+        <span class="glyphicon glyphicon-calendar"></span>
+        <span class="card-title" id="name_{{ project.name }}">{{ project.name }}</span>
         <input id="project_name{{ project.id }}" value="{{ project.name }}" hidden>
-            <button id="edit{{ project.id }}" onclick="editProject({{project.id}}, '{{project.name}}')">Edit</button>
-            <button id="save{{ project.id }}" onclick="updateProject({{project.id}}, '{{project.name}}')" hidden>Save</button>
-            <button onclick="deleteProject({{project.id}})">Delete</button>
-        <div class="">
+            <button type="button" class="glyphicon glyphicon-pencil" id="edit{{ project.id }}"
+                    onclick="editProject({{project.id}}, '{{project.name}}')"></button>
+            <button type="button" id="save{{ project.id }}"
+                    onclick="updateProject({{project.id}}, '{{project.name}}')" hidden>Save</button>
+            <button type="button" class="glyphicon glyphicon-trash" onclick="deleteProject({{project.id}})"></button>
+        </div>
+        <div class="form-control">
+            <span class="glyphicon glyphicon-plus"></span>
             <input id="new_task{{ project.id }}">
-            <button onclick="createTask({{ project.id }})">Add Task</button>
+            <button type="button" onclick="createTask({{ project.id }})">Add Task</button>
             <span id="task_info{{ project.id }}" hidden></span>
         </div>
     </div>
 
     {% for task in project.tasks %}
-        <div class="form">
-            <input type="checkbox" id="task_done{{ task.id }}" onchange="doneTask({{ task.id }}, {{ project.id }})"
-                   {% if task.status == 'complete' %} checked {% else %} '' {% endif %}>
-            <span id="task_name{{ task.id }}" style="color: plum;">{{ task.name }}</span>
-            <span id="task_deadline{{ task.id }}" style="color: plum;"
-                  {% if task.deadline %}{% else %} hidden {% endif %}>
-                {{ task.deadline }}
-            </span>
-            <input id="new_task_name{{ task.id }}" value="{{ task.name }}" hidden>
-            <input class="ui-datepicker" id="datepicker{{ task.id }}" placeholder="{{ task.deadline }}" onclick="showDate({{ task.id }})"
-                   {% if task.deadline %} value="{{ task.deadline }}" {% else %} hidden {% endif %}>
-        <button id="move_task">Move</button>
-        <button id="edit_task{{ task.id }}" onclick="editTask({{ task.id }})">Edit</button>
-        <button id="save_task{{ task.id }}" onclick="updateTask({{ task.id }}, {{ project.id }})" hidden>Save</button>
-        <button onclick="deleteTask({{ task.id }}, {{ project.id }})">Delete</button>
-        <span id="new_task_info" hidden></span>
-        </div>
+        <ul class="list-group list-group-flush" style="width: 50rem">
+                    <li class="list-group-item">
+                        <input type="checkbox" id="task_done{{ task.id }}" onchange="doneTask({{ task.id }}, {{ project.id }})"
+                           {% if task.status == 'complete' %} checked {% else %} '' {% endif %}>
+                        <span id="task_name{{ task.id }}" style="color: plum;">{{ task.name }}</span>
+                        <span id="task_deadline{{ task.id }}" style="color: plum;"
+                              {% if task.deadline %}{% else %} hidden {% endif %}>
+                            {{ task.deadline }}
+                        </span>
+                        <input id="new_task_name{{ task.id }}" value="{{ task.name }}" hidden>
+                        <input class="ui-datepicker" id="datepicker{{ task.id }}" placeholder="{{ task.deadline }}"
+                                onclick="showDate({{ task.id }})"
+                                {% if task.deadline %} value="{{ task.deadline }}" {% else %} hidden {% endif %}>
+                        <button type="button" class="glyphicon glyphicon-triangle-top" id="move_task_up{{ task.id }}"
+                                onclick="moveUp({{ task.id }}, {{ project.id }})"></button>
+                        <button type="button" class="glyphicon glyphicon-triangle-bottom" id="move_task_down{{ task.id }}"
+                                onclick="moveDown({{ task.id }}, {{ project.id }})"></button>
+                        <button type="button" class="butt glyphicon glyphicon-pencil" id="edit_task{{ task.id }}"
+                                onclick="editTask({{ task.id }})"></button>
+                        <button type="button" class="glyphicon glyphicon-saved" id="save_task{{ task.id }}"
+                                onclick="updateTask({{ task.id }}, {{ project.id }})" hidden></button>
+                        <button type="button" class="glyphicon glyphicon-trash"
+                                onclick="deleteTask({{ task.id }}, {{ project.id }})"></button>
+                    </li>
+                    <span id="new_task_info" hidden></span>
+        </ul>
     {% endfor %}
 {% endfor %}
 
-<input type="text" id="new_project">
-<button onclick="createProject()">Add TODO List</button>
+<input id="new_project" hidden>
+<button type="button" id="add_project" class="btn btn-primary" onclick="addProject()">
+    <span class="glyphicon glyphicon-plus"></span><b>Add TODO List</b>
+</button>
+<button type="button" id="create_project" class="btn btn-primary" onclick="createProject()" hidden>
+    <span class="glyphicon glyphicon-plus"></span><b>Add TODO List</b>
+</button>
 <br><span id="info"></span>
 
 {% endblock %}

@@ -38,5 +38,5 @@ class Tasks(db.Model):
     priority = Column(Integer, nullable=True)
 
     def __repr__(self):
-        return 'Project ID: {0}; name: "{1}"; status: "{2}"'.\
-            format(self.project_id, self.name, self.status)
+        return 'Project ID: {0}; name: "{1}"; priority: {2}; status: "{3}"'.\
+            format(self.project_id, self.name, self.priority, self.status)
