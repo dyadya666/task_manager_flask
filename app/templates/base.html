@@ -23,6 +23,7 @@
     {% if g.user.is_authenticated %}
     <div class="navabar">
         <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('queries', query='None') }}">Queries</a>
     </div>
     <div id="content">
     {% endif %}

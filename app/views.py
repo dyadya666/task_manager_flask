@@ -1,6 +1,7 @@
-from flask import render_template, redirect, url_for, request, jsonify, g
 from flask_login import login_user, logout_user, current_user, login_required, \
                         UserMixin
+from flask import render_template, redirect, url_for, request, jsonify, g
+from sqlalchemy import func
 
 from app import app, db, open_id, log_manager
 from .forms import LoginForm
@@ -203,9 +204,13 @@ def create_task():
                      project_id=request.form['project_id'])
     list_of_priority = set_priority(request.form['project_id'])
     list_of_priority.reverse()
-    new_task.priority = list_of_priority[0] + 1
-    db.session.add(new_task)
-    db.session.commit()
+    try:
+        new_task.priority = list_of_priority[0] + 1
+        db.session.add(new_task)
+        db.session.commit()
+    except IndexError:
+        db.session.add(new_task)
+        db.session.commit()
 
     check = Tasks.query.filter_by(name=request.form['new_name'],
                                   project_id=request.form['project_id']).first()
@@ -263,7 +268,7 @@ def update_task():
     check = Tasks.query.filter_by(id=request.form['task_id'],
                                   project_id=request.form['project_id']).first()
     if check.name != str(request.form['new_name']).strip() and \
-        check.deadline != request.form['deadline']:
+                                    check.deadline != request.form['deadline']:
 
         return jsonify({
             'result': False
@@ -297,3 +302,87 @@ def task_done():
     return jsonify({
         'result': False
     })
+
+
+#SQL-queries
+@app.route('/queries/<query>', methods=['GET', 'POST'])
+@login_required
+def queries(query=None):
+    response = ''
+    query_title = ''
+    query_number = 0
+
+    if query == 'query_1':
+        response = query_1()
+        query_title = 'Get all statuses, not repeating, alphabetically ordered'
+        query_number = 1
+
+    if query == 'query_2':
+        response = query_2()
+        query_title = 'Get the count of all tasks in each project, order by ' \
+                      'tasks count descending'
+        query_number = 2
+
+    return render_template('queries.html',
+                           title='Queries',
+                           queries=response,
+                           query_title=query_title,
+                           query_number = query_number)
+
+
+# 1.get all statuses, not repeating, alphabetically ordered
+def query_1():
+    query = Tasks.query.group_by(Tasks.status).all()
+    return query
+
+
+# 2.get the count of all tasks in each project, order by tasks count descending
+def query_2():
+    query = db.session.query(Tasks.project_id, func.count(Tasks.project_id)).\
+                       group_by(Tasks.project_id).all()
+    query_list = sorted(query, key=lambda query: query[1], reverse=True)
+    query_result = []
+    for elem in query_list:
+        sub_query = Tasks.query.filter_by(project_id=elem[0]).all()
+        query_result.append(sub_query)
+    return query_result
+
+
+# 3.get the count of all tasks in each project, order by projects names
+def query_3():
+    query = Tasks.query.all()
+    return query
+
+
+# 4.get the tasks for all projects having the name beginning with “N” letter
+def query_4():
+    query = ''
+    return query
+
+
+# 5.get the list of all projects containing the ‘a’ letter in the middle of the name,
+# and show the tasks count near each project.
+# Mention that there can exist projects without tasks and tasks with project_id=NULL
+def query_5():
+    query = ''
+    return query
+
+
+# 6.get the list of tasks with duplicate names. Order alphabetically
+def query_6():
+    query = ''
+    return query
+
+
+# 7.get the list of tasks having several exact matches of both name and status,
+# from the project ‘Garage’. Order by matches count
+def query_7():
+    query = ''
+    return query
+
+
+# 8.get the list of project names having more than 10 tasks in status ‘completed’.
+# Order by project_id
+def query_8():
+    query = ''
+    return query
