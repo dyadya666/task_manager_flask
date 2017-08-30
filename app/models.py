@@ -35,7 +35,9 @@ class Tasks(db.Model):
     name = Column(String, index=True)
     status = Column(String, default=IN_PROGRESS)
     deadline = Column(String, nullable=True)
-    priority = Column(Integer, nullable=True)
+    priority = Column(Integer, default=0)
+
+    project = relationship(Projects, backref=backref('children', cascade='all, delete, delete-orphan'))
 
     def __repr__(self):
         return 'Project ID: {0}; name: "{1}"; priority: {2}; status: "{3}"'.\

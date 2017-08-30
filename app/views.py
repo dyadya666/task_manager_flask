@@ -48,7 +48,6 @@ def view(nickname):
     user = g.user
     projects = Projects.query.filter_by(user_id=user.id).all()
     for project in projects:
-        # import pdb; pdb.set_trace()
         tasks = project.tasks
         tasks_sorted = sorted(tasks, key=lambda tasks: tasks.priority)
         project.tasks = tasks_sorted
@@ -78,17 +77,6 @@ class User(UserMixin):
 def get_user(id):
     user = Users.query.get(id)
     return User(user.nickname, user.id)
-
-
-@app.errorhandler(404)
-def not_found_error(error):
-    return render_template('404.html') ,404
-
-
-@app.errorhandler(500)
-def internal_error(error):
-    db.session.rollback()
-    return render_template('500.html'), 500
 
 
 # API for Projects
@@ -151,12 +139,71 @@ def update_project():
     })
 
 
+@app.route('/change_priority', methods=['POST'])
+@login_required
+def change_priority():
+    task_to_move = Tasks.query.filter_by(id=request.form['task_id'],
+                                         project_id=request.form['project_id']).first()
+    list_of_priority = set_priority(request.form['project_id'])
+
+    if request.form['up_down'] == 'up':
+        if list_of_priority.index(task_to_move.priority) - 1 < 0:
+            return jsonify({
+                'result': True
+            })
+
+        priority_of_previous_task = list_of_priority[list_of_priority.index(task_to_move.priority)] - 1
+        previous_task = Tasks.query.filter_by(project_id=request.form['project_id'],
+                                              priority=priority_of_previous_task).first()
+        previous_task.priority = task_to_move.priority
+        task_to_move.priority = priority_of_previous_task
+        db.session.add(task_to_move)
+        db.session.add(previous_task)
+        try:
+            db.session.commit()
+            return jsonify({
+                'result': True
+            })
+        except:
+            return jsonify({
+                'result': False
+            })
+
+    if request.form['up_down'] == 'down':
+        try:
+            priority_of_next_task = list_of_priority[list_of_priority.index(task_to_move.priority) + 1]
+        except IndexError:
+            db.session.commit()
+            return jsonify({
+                'result': True
+            })
+
+        next_task = Tasks.query.filter_by(project_id=request.form['project_id'],
+                                              priority=priority_of_next_task).first()
+        next_task.priority = task_to_move.priority
+        task_to_move.priority = priority_of_next_task
+        db.session.add(task_to_move)
+        db.session.add(next_task)
+        try:
+            db.session.commit()
+            return jsonify({
+                'result': True
+            })
+        except:
+            return jsonify({
+                'result': False
+            })
+
+
 # API for Tasks
 @app.route('/create_task', methods=['POST'])
 @login_required
 def create_task():
     new_task = Tasks(name=str(request.form['new_name']).strip(),
                      project_id=request.form['project_id'])
+    list_of_priority = set_priority(request.form['project_id'])
+    list_of_priority.reverse()
+    new_task.priority = list_of_priority[0] + 1
     db.session.add(new_task)
     db.session.commit()
 
@@ -169,6 +216,14 @@ def create_task():
     return jsonify({
         'result': True
     })
+
+
+def set_priority(project_id):
+    tasks = Tasks.query.filter_by(project_id=project_id).all()
+    list_of_priorities = [task.priority for task in tasks]
+    list_of_priorities.sort()
+
+    return list_of_priorities
 
 
 @app.route('/delete_task', methods=['POST'])

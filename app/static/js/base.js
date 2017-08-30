@@ -204,6 +204,20 @@ function showDate(task_id) {
 }
 
 //Prioritize Tasks
-function moveUp(task_id, project_id) {
+function changePriority(task_id, project_id, up_down) {
+    console.log(task_id + ' - ' + project_id + ' - ' + up_down);
 
+    $.post("/change_priority", {
+        task_id: task_id,
+        project_id: project_id,
+        up_down: up_down
+    }).done(function (result) {
+       if (result['result'] === true){
+           location.reload();
+       } else if (result['result'] === false){
+           alert('Priority was not changed!');
+       }
+    }).fail(function () {
+        alert('Server error!');
+    })
 }

@@ -45,9 +45,9 @@
                                 onclick="showDate({{ task.id }})"
                                 {% if task.deadline %} value="{{ task.deadline }}" {% else %} hidden {% endif %}>
                         <button type="button" class="glyphicon glyphicon-triangle-top" id="move_task_up{{ task.id }}"
-                                onclick="moveUp({{ task.id }}, {{ project.id }})"></button>
+                                onclick="changePriority({{ task.id }}, {{ project.id }}, 'up')"></button>
                         <button type="button" class="glyphicon glyphicon-triangle-bottom" id="move_task_down{{ task.id }}"
-                                onclick="moveDown({{ task.id }}, {{ project.id }})"></button>
+                                onclick="changePriority({{ task.id }}, {{ project.id }}, 'down')"></button>
                         <button type="button" class="butt glyphicon glyphicon-pencil" id="edit_task{{ task.id }}"
                                 onclick="editTask({{ task.id }})"></button>
                         <button type="button" class="glyphicon glyphicon-saved" id="save_task{{ task.id }}"
