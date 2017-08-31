@@ -11,7 +11,7 @@
 <h2>User: {{ user.nickname }}</h2>
 
 {% for project in projects %}
-    <div class="card" style="width: 50rem">
+    <div class="card">
         <div class="card-body">
         <span class="glyphicon glyphicon-calendar"></span>
         <span class="card-title" id="name_{{ project.name }}">{{ project.name }}</span>
@@ -32,17 +32,18 @@
 
     {% for task in project.tasks %}
         <ul class="list-group list-group-flush" style="width: 50rem">
-                    <li class="list-group-item">
+                    <li class="list-group-item" style="text-align: left;">
                         <input type="checkbox" id="task_done{{ task.id }}" onchange="doneTask({{ task.id }}, {{ project.id }})"
-                           {% if task.status == 'complete' %} checked {% else %} '' {% endif %}>
+                           {% if task.status == 'completed' %} checked {%
+                        else %} '' {% endif %}>
                         <span id="task_name{{ task.id }}" style="color: plum;">{{ task.name }}</span>
                         <span id="task_deadline{{ task.id }}" style="color: plum;"
                               {% if task.deadline %}{% else %} hidden {% endif %}>
                             {{ task.deadline }}
                         </span>
                         <input id="new_task_name{{ task.id }}" value="{{ task.name }}" hidden>
-                        <input class="ui-datepicker" id="datepicker{{ task.id }}" placeholder="{{ task.deadline }}"
-                                onclick="showDate({{ task.id }})"
+                        <input class="ui-datepicker"
+                               id="datepicker{{ task.id }}" placeholder="deadline" onclick="showDate({{ task.id }})"
                                 {% if task.deadline %} value="{{ task.deadline }}" {% else %} hidden {% endif %}>
                         <button type="button" class="glyphicon glyphicon-triangle-top" id="move_task_up{{ task.id }}"
                                 onclick="changePriority({{ task.id }}, {{ project.id }}, 'up')"></button>
@@ -60,6 +61,7 @@
     {% endfor %}
 {% endfor %}
 
+<div style="margin-top: 50px">
 <input id="new_project" hidden>
 <button type="button" id="add_project" class="btn btn-primary" onclick="addProject()">
     <span class="glyphicon glyphicon-plus"></span><b>Add TODO List</b>
@@ -68,5 +70,6 @@
     <span class="glyphicon glyphicon-plus"></span><b>Add TODO List</b>
 </button>
 <br><span id="info"></span>
+</div>
 
 {% endblock %}
