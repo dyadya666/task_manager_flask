@@ -30,7 +30,8 @@ def login():
 
         user = get_user(id=user.id)
         login_user(user)
-        return redirect(request.args.get('next') or url_for('view', nickname=g.user.nickname))
+        return redirect(request.args.get('next') or
+                        url_for('view', nickname=g.user.nickname))
     return render_template('login.html',
                            title='Log In',
                            form=form,
@@ -145,7 +146,7 @@ def update_project():
 def change_priority():
     task_to_move = Tasks.query.filter_by(id=request.form['task_id'],
                                          project_id=request.form['project_id']).first()
-    list_of_priority = set_priority(request.form['project_id'])
+    list_of_priority = get_list_of_priorities(request.form['project_id'])
 
     if request.form['up_down'] == 'up':
         if list_of_priority.index(task_to_move.priority) - 1 < 0:
@@ -196,21 +197,24 @@ def change_priority():
             })
 
 
+def get_list_of_priorities(project_id):
+    tasks = Tasks.query.filter_by(project_id=project_id).all()
+    list_of_priorities = [task.priority for task in tasks]
+    list_of_priorities.sort()
+    return list_of_priorities
+
+
 # API for Tasks
 @app.route('/create_task', methods=['POST'])
 @login_required
 def create_task():
     new_task = Tasks(name=str(request.form['new_name']).strip(),
                      project_id=request.form['project_id'])
-    list_of_priority = set_priority(request.form['project_id'])
-    list_of_priority.reverse()
-    try:
-        new_task.priority = list_of_priority[0] + 1
-        db.session.add(new_task)
-        db.session.commit()
-    except IndexError:
-        db.session.add(new_task)
-        db.session.commit()
+    new_task.priority = Tasks.query.filter_by(
+                                project_id=request.form['project_id'])\
+                                .count()
+    db.session.add(new_task)
+    db.session.commit()
 
     check = Tasks.query.filter_by(name=request.form['new_name'],
                                   project_id=request.form['project_id']).first()
@@ -221,14 +225,6 @@ def create_task():
     return jsonify({
         'result': True
     })
-
-
-def set_priority(project_id):
-    tasks = Tasks.query.filter_by(project_id=project_id).all()
-    list_of_priorities = [task.priority for task in tasks]
-    list_of_priorities.sort()
-
-    return list_of_priorities
 
 
 @app.route('/delete_task', methods=['POST'])
@@ -302,87 +298,3 @@ def task_done():
     return jsonify({
         'result': False
     })
-
-
-#SQL-queries
-@app.route('/queries/<query>', methods=['GET', 'POST'])
-@login_required
-def queries(query=None):
-    response = ''
-    query_title = ''
-    query_number = 0
-
-    if query == 'query_1':
-        response = query_1()
-        query_title = 'Get all statuses, not repeating, alphabetically ordered'
-        query_number = 1
-
-    if query == 'query_2':
-        response = query_2()
-        query_title = 'Get the count of all tasks in each project, order by ' \
-                      'tasks count descending'
-        query_number = 2
-
-    return render_template('queries.html',
-                           title='Queries',
-                           queries=response,
-                           query_title=query_title,
-                           query_number = query_number)
-
-
-# 1.get all statuses, not repeating, alphabetically ordered
-def query_1():
-    query = Tasks.query.group_by(Tasks.status).all()
-    return query
-
-
-# 2.get the count of all tasks in each project, order by tasks count descending
-def query_2():
-    query = db.session.query(Tasks.project_id, func.count(Tasks.project_id)).\
-                       group_by(Tasks.project_id).all()
-    query_list = sorted(query, key=lambda query: query[1], reverse=True)
-    query_result = []
-    for elem in query_list:
-        sub_query = Tasks.query.filter_by(project_id=elem[0]).all()
-        query_result.append(sub_query)
-    return query_result
-
-
-# 3.get the count of all tasks in each project, order by projects names
-def query_3():
-    query = Tasks.query.all()
-    return query
-
-
-# 4.get the tasks for all projects having the name beginning with “N” letter
-def query_4():
-    query = ''
-    return query
-
-
-# 5.get the list of all projects containing the ‘a’ letter in the middle of the name,
-# and show the tasks count near each project.
-# Mention that there can exist projects without tasks and tasks with project_id=NULL
-def query_5():
-    query = ''
-    return query
-
-
-# 6.get the list of tasks with duplicate names. Order alphabetically
-def query_6():
-    query = ''
-    return query
-
-
-# 7.get the list of tasks having several exact matches of both name and status,
-# from the project ‘Garage’. Order by matches count
-def query_7():
-    query = ''
-    return query
-
-
-# 8.get the list of project names having more than 10 tasks in status ‘completed’.
-# Order by project_id
-def query_8():
-    query = ''
-    return query

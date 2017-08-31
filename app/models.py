@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship, backref
 
 
 IN_PROGRESS = 'inprogress'
-COMPLETE = 'complete'
+COMPLETE = 'completed'
 
 
 class Users(db.Model):
