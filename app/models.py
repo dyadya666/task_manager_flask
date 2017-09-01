@@ -13,8 +13,20 @@ class Users(db.Model):
 
     projects = relationship('Projects', backref=backref('projects', lazy=False))
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return '<User id: {0} - nickname: {1}>'.format(self.id, self.nickname)
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def is_authenticated(self):
+        return True
+
+    def get_id(self):
+        return self.id
 
 
 class Projects(db.Model):
@@ -24,7 +36,7 @@ class Projects(db.Model):
 
     tasks = relationship('Tasks', backref=backref('tasks', lazy=False))
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return '<User ID "{0}" - name of project {1}>'.\
                 format(self.user_id, self.name)
 
@@ -39,6 +51,6 @@ class Tasks(db.Model):
 
     project = relationship(Projects, backref=backref('children', cascade='all, delete, delete-orphan'))
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return 'Project ID: {0}; name: "{1}"; priority: {2}; status: "{3}"'.\
             format(self.project_id, self.name, self.priority, self.status)

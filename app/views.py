@@ -1,7 +1,6 @@
 from flask_login import login_user, logout_user, current_user, login_required, \
                         UserMixin
 from flask import render_template, redirect, url_for, request, jsonify, g
-from sqlalchemy import func
 
 from app import app, db, open_id, log_manager
 from .forms import LoginForm
@@ -28,7 +27,6 @@ def login():
             db.session.add(user)
             db.session.commit()
 
-        user = get_user(id=user.id)
         login_user(user)
         return redirect(request.args.get('next') or
                         url_for('view', nickname=g.user.nickname))
@@ -57,28 +55,6 @@ def view(nickname):
                            title='List',
                            user=user,
                            projects=projects)
-
-
-class User(UserMixin):
-    def __init__(self, nickname, id, active=True):
-        self.nickname = nickname
-        self.id = id
-        self.active = active
-
-    def is_active(self):
-        return self.active
-
-    def is_anonymous(self):
-        return False
-
-    def is_authenticated(self):
-        return True
-
-
-@log_manager.user_loader
-def get_user(id):
-    user = Users.query.get(id)
-    return User(user.nickname, user.id)
 
 
 # API for Projects

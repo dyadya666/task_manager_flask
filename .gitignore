@@ -5,8 +5,10 @@ __pycache__/
 app/__pycache__/
 
 myvenv/
+tmp/
 
 app.db
+test.db
 db_repository/
 db_upgrade.py
 db_clear.py
