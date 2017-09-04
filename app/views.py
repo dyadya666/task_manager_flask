@@ -1,10 +1,14 @@
-from flask_login import login_user, logout_user, current_user, login_required, \
-                        UserMixin
+from flask_login import login_user, logout_user, current_user, login_required
 from flask import render_template, redirect, url_for, request, jsonify, g
 
 from app import app, db, open_id, log_manager
 from .forms import LoginForm
 from .models import Users, Projects, Tasks, COMPLETE, IN_PROGRESS
+
+
+@log_manager.user_loader
+def load_user(id):
+    return Users.query.get(int(id))
 
 
 @app.before_request
@@ -59,14 +63,22 @@ def view(nickname):
 
 # API for Projects
 @app.route('/create_project', methods=['POST'])
-@login_required
-def create_project():
-    new_project = Projects(name=request.form['name'], user_id=g.user.id)
+# @login_required
+def create_project(name=None, user_id=None, test=None):
+    if name is None and user_id is None:
+        name = request.form['name']
+        user_id = g.user.id
+
+    new_project = Projects(name=name, user_id=user_id)
     db.session.add(new_project)
     db.session.commit()
 
-    check = Projects.query.filter_by(user_id=g.user.id,
-                                    name=request.form['name']).first()
+    check = Projects.query.filter_by(user_id=user_id,
+                                    name=name).first()
+
+    if test == True:
+        return check
+
     if check is None:
         return jsonify({
             'result': False
@@ -77,20 +89,28 @@ def create_project():
 
 
 @app.route('/delete_project', methods=['POST'])
-@login_required
-def delete_project():
-    project = Projects.query.filter_by(id=request.form['project_id'],
-                                       user_id=g.user.id).first()
+# @login_required
+def delete_project(id=None, user_id=None, test=None):
+    if id is None and user_id is None:
+        id = request.form['project_id']
+        user_id = g.user.id
+
+    project = Projects.query.filter_by(id=id,
+                                       user_id=user_id).first()
     db.session.delete(project)
     db.session.commit()
 
     try:
         Projects.query.filter_by(id=request.form['id'],
                                  user_id=g.user.id).first()
+
         return jsonify({
             'result': False
         })
     except:
+        if test is True:
+            return True
+
         return jsonify({
             'result': True
         })
