@@ -117,17 +117,23 @@ def delete_project(id=None, user_id=None, test=None):
 
 
 @app.route('/update_project', methods=['POST'])
-@login_required
-def update_project():
-    project = Projects.query.filter_by(id=request.form['project_id'],
-                                       user_id=g.user.id).first()
-    project.name = request.form['new_name']
+# @login_required
+def update_project(id=None, user_id=None, new_name=None, test=None):
+    if test is None:
+        id  = request.form['project_id']
+        user_id = g.user.id
+        new_name = request.form['new_name']
+
+    project = Projects.query.filter_by(id=id, user_id=user_id).first()
+    project.name = new_name
     db.session.add(project)
     db.session.commit()
 
-    check = Projects.query.filter_by(id=request.form['project_id'],
-                                     user_id=g.user.id).first()
-    if check.name == request.form['new_name']:
+    check = Projects.query.filter_by(id=id, user_id=user_id).first()
+    if check.name == new_name:
+        if test is True:
+            return True
+
         return jsonify({
             'result': True
         })
@@ -138,27 +144,49 @@ def update_project():
 
 
 @app.route('/change_priority', methods=['POST'])
-@login_required
-def change_priority():
-    task_to_move = Tasks.query.filter_by(id=request.form['task_id'],
-                                         project_id=request.form['project_id']).first()
-    list_of_priority = get_list_of_priorities(request.form['project_id'])
+# @login_required
+def change_priority(id_task_to_move=None,
+                    project_id=None,
+                    up_down=None,
+                    test=None):
+    if id_task_to_move is None \
+            and project_id is None \
+            and up_down is None:
+        id_task_to_move = request.form['task_id']
+        project_id = request.form['project_id']
+        up_down = request.form['up_down']
 
-    if request.form['up_down'] == 'up':
+    task_to_move = Tasks.query.filter_by(id=id_task_to_move,
+                                         project_id=project_id).first()
+    list_of_priority = get_list_of_priorities(project_id)
+
+    if up_down == 'up':
         if list_of_priority.index(task_to_move.priority) - 1 < 0:
+            if test is True:
+                return True
+
             return jsonify({
                 'result': True
             })
 
-        priority_of_previous_task = list_of_priority[list_of_priority.index(task_to_move.priority)] - 1
-        previous_task = Tasks.query.filter_by(project_id=request.form['project_id'],
-                                              priority=priority_of_previous_task).first()
+        priority_of_previous_task = \
+                    list_of_priority[
+                        list_of_priority.index(task_to_move.priority)
+                                    ] - 1
+
+        previous_task = Tasks.query.filter_by(
+                                    project_id=project_id,
+                                    priority=priority_of_previous_task).first()
         previous_task.priority = task_to_move.priority
         task_to_move.priority = priority_of_previous_task
         db.session.add(task_to_move)
         db.session.add(previous_task)
         try:
             db.session.commit()
+
+            if test is True:
+                return True
+
             return jsonify({
                 'result': True
             })
@@ -167,23 +195,35 @@ def change_priority():
                 'result': False
             })
 
-    if request.form['up_down'] == 'down':
+    if up_down == 'down':
         try:
-            priority_of_next_task = list_of_priority[list_of_priority.index(task_to_move.priority) + 1]
+            priority_of_next_task = \
+                    list_of_priority[
+                        list_of_priority.index(task_to_move.priority)
+                        + 1]
         except IndexError:
             db.session.commit()
+
+            if test is True:
+                return True
+
             return jsonify({
                 'result': True
             })
 
-        next_task = Tasks.query.filter_by(project_id=request.form['project_id'],
-                                              priority=priority_of_next_task).first()
+        next_task = Tasks.query.filter_by(
+                        project_id=project_id,
+                        priority=priority_of_next_task).first()
         next_task.priority = task_to_move.priority
         task_to_move.priority = priority_of_next_task
         db.session.add(task_to_move)
         db.session.add(next_task)
         try:
             db.session.commit()
+
+            if test is True:
+                return True
+
             return jsonify({
                 'result': True
             })
@@ -202,38 +242,49 @@ def get_list_of_priorities(project_id):
 
 # API for Tasks
 @app.route('/create_task', methods=['POST'])
-@login_required
-def create_task():
-    new_task = Tasks(name=str(request.form['new_name']).strip(),
-                     project_id=request.form['project_id'])
-    new_task.priority = Tasks.query.filter_by(
-                                project_id=request.form['project_id'])\
-                                .count()
+# @login_required
+def create_task(new_task_name=None, project_id=None, test=None):
+    if new_task_name is None and project_id is None:
+        new_task_name = str(request.form['new_name']).strip()
+        project_id = request.form['project_id']
+
+    new_task = Tasks(name=new_task_name, project_id=project_id)
+    new_task.priority = Tasks.query.filter_by(project_id=project_id).count()
     db.session.add(new_task)
     db.session.commit()
 
-    check = Tasks.query.filter_by(name=request.form['new_name'],
-                                  project_id=request.form['project_id']).first()
+    check = Tasks.query.filter_by(name=new_task_name,
+                                  project_id=project_id).first()
+
     if check is None:
         return jsonify({
             'result': False
         })
+
+    if test is True:
+        return True
+
     return jsonify({
         'result': True
     })
 
 
 @app.route('/delete_task', methods=['POST'])
-@login_required
-def delete_task():
-    task = Tasks.query.filter_by(id=request.form['task_id'],
-                                 project_id=request.form['project_id']).first()
+# @login_required
+def delete_task(id=None, project_id=None, test=None):
+    if id is None and project_id is None:
+        id = request.form['task_id']
+        project_id = request.form['project_id']
+
+    task = Tasks.query.filter_by(id=id, project_id=project_id).first()
     db.session.delete(task)
     db.session.commit()
 
-    check = Tasks.query.filter_by(id=request.form['task_id'],
-                                  project_id=request.form['project_id']).first()
+    check = Tasks.query.filter_by(id=id, project_id=project_id).first()
     if check is None:
+        if test is True:
+            return True
+
         return jsonify({
             'result': True
         })
@@ -243,28 +294,41 @@ def delete_task():
 
 
 @app.route('/update_task', methods=['POST'])
-@login_required
-def update_task():
-    task = Tasks.query.filter_by(id=request.form['task_id'],
-                                 project_id=request.form['project_id']).first()
+# @login_required
+def update_task(id=None,
+                project_id=None,
+                new_name=None,
+                deadline=None,
+                test=None):
+    if id is None \
+            and project_id is None \
+            and new_name is None \
+            and deadline is None:
+        id = request.form['task_id']
+        project_id = request.form['project_id']
+        new_name = str(request.form['new_name']).strip()
+        deadline = request.form['deadline']
+
+    task = Tasks.query.filter_by(id=id, project_id=project_id).first()
     if task is None:
         return jsonify({
             'result': False
         })
 
-    task.name = str(request.form['new_name']).strip()
-    task.deadline = request.form['deadline']
+    task.name = new_name
+    task.deadline = deadline
     db.session.add(task)
     db.session.commit()
 
-    check = Tasks.query.filter_by(id=request.form['task_id'],
-                                  project_id=request.form['project_id']).first()
-    if check.name != str(request.form['new_name']).strip() and \
-                                    check.deadline != request.form['deadline']:
+    check = Tasks.query.filter_by(id=id, project_id=project_id).first()
 
+    if check.name != new_name and check.deadline != deadline:
         return jsonify({
             'result': False
         })
+
+    if test is True:
+        return True
 
     return jsonify({
         'result': True
@@ -272,21 +336,27 @@ def update_task():
 
 
 @app.route('/task_done', methods=['POST'])
-@login_required
-def task_done():
+# @login_required
+def task_done(task_id=None, project_id=None, status_checkbox=None, test=None):
+    if task_id is None and project_id is None and status_checkbox is None:
+        task_id = request.form['task_id']
+        project_id = request.form['project_id']
+        status_checkbox = request.form['status']
+
     status = IN_PROGRESS
-    if request.form['status'] == 'true':
+    if status_checkbox == 'true':
         status = COMPLETE
 
-    task = Tasks.query.filter_by(id=request.form['task_id'],
-                                 project_id=request.form['project_id']).first()
+    task = Tasks.query.filter_by(id=task_id, project_id=project_id).first()
     task.status = status
     db.session.add(task)
     db.session.commit()
 
-    check = Tasks.query.filter_by(id=request.form['task_id'],
-                                 project_id=request.form['project_id']).first()
+    check = Tasks.query.filter_by(id=task_id, project_id=project_id).first()
     if check.status == status:
+        if test is True:
+            return True
+
         return jsonify({
             'result': True
         })
