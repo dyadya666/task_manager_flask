@@ -8,7 +8,8 @@
     {{form.hidden_tag()}}
     {% if error %}<p class=error><strong>Error:</strong> {{ error }}</p>{% endif %}
     <dl>
-        <dd>{{form.nickname}}</dd>
+        <dd><span style="color: beige; text-align: justify">Username </span>{{form.nickname}}</dd>
+        <dd><span style="color: beige">Password </span>{{form.password}}</dd>
     </dl>
     {% for error in form.errors.nickname %}
     <span>{{error}}</span>

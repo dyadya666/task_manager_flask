@@ -10,6 +10,7 @@ COMPLETE = 'completed'
 class Users(db.Model):
     id = Column(Integer, primary_key=True)
     nickname = Column(String(50), index=True, unique=True)
+    password = Column(String)
 
     projects = relationship('Projects', backref=backref('projects', lazy=False))
 

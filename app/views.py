@@ -1,11 +1,23 @@
+import uuid
+import hashlib
+
 from flask_login import login_user, logout_user, current_user, login_required, \
                         UserMixin
 from flask import render_template, redirect, url_for, request, jsonify, g
-from sqlalchemy import func
 
 from app import app, db, open_id, log_manager
 from .forms import LoginForm
 from .models import Users, Projects, Tasks, COMPLETE, IN_PROGRESS
+
+
+def hash_password(password):
+    salt = uuid.uuid4().hex
+    return hashlib.sha256(salt.encode() + password.encode()).hexdigest() + ':' + salt
+
+
+def check_password(hashed_password, user_password):
+    password, salt = hashed_password.split(':')
+    return password == hashlib.sha256(salt.encode() + user_password.encode()).hexdigest()
 
 
 @app.before_request
@@ -25,13 +37,21 @@ def login():
 
         if user is None:
             user = Users(nickname=form.nickname.data)
+            user.password = hash_password(form.password.data)
             db.session.add(user)
             db.session.commit()
+
+        if not check_password(user.password, form.password.data):
+            return render_template('login.html',
+                                   title='Log In',
+                                   form=form,
+                                   error=open_id.fetch_error())
 
         user = get_user(id=user.id)
         login_user(user)
         return redirect(request.args.get('next') or
                         url_for('view', nickname=g.user.nickname))
+
     return render_template('login.html',
                            title='Log In',
                            form=form,
