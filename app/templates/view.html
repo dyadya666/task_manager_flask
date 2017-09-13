@@ -10,9 +10,10 @@
 
 <h2>User: {{ user.nickname }}</h2>
 
+
+{% for project in projects %}
     <table class="table table-hover-yellow" style="width: 50rem">
         <tbody>
-{% for project in projects %}
         <tr style="background-color: #2250b7">
             <td style="text-align: center;">
                 <span class="glyphicon glyphicon-calendar"></span>
