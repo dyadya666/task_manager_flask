@@ -16,3 +16,10 @@ h2 {
 .ui-datepicker {
     width: 20rem;
 }
+
+.btn-back {
+    border: none;
+    background-color: transparent;
+    outline: none;
+    color: #9d9f96;
+}

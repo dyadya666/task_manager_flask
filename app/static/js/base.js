@@ -50,6 +50,7 @@ function editProject(project_id, project_name) {
     $('#name_' + project_name).hide();
     $('#project_name' + project_id).show();
     $('#edit' + project_id).hide();
+    $('#delete' + project_id).hide();
     $('#save' + project_id).show();
 }
 
